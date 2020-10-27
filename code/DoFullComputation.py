@@ -7,7 +7,9 @@ import pandas as pd
 from GenMELTSEnsemble import GenerateMELTSEnsemble
 from ProcessMELTS import ProcessAlphaMELTS
 from CombineMELTSEnsemble import ReadInAllOutputs, Make2DCrossSection, Plot2DCrossSection
-from rich.traceback import install; install()
+from rich.traceback import install;
+
+install()
 
 if __name__ == "__main__":
     print('------------------------------ START ------------------------------')
@@ -19,8 +21,8 @@ if __name__ == "__main__":
 
     if DoMELTSSims:
         # Create MELTS simulations
-        GenerateMELTSEnsemble(  alphaMELTSLocation, ComputeScratchSpace,
-                                ConstantInputs, ParameterizedInputs)
+        GenerateMELTSEnsemble(alphaMELTSLocation, ComputeScratchSpace,
+                              ConstantInputs, ParameterizedInputs)
 
         # And run them
         os.system('cd "' + ComputeScratchSpace + '"; parallel < runall.sh; cd -')
@@ -38,6 +40,7 @@ if __name__ == "__main__":
             from glob2 import glob
             # from dask import delayed, compute
             import dask
+
             dask.config.set(scheduler='processes')
             # dask.config.set(scheduler='synchronous')
 
@@ -45,10 +48,13 @@ if __name__ == "__main__":
             # Dirs = glob(os.path.join(ThisDir, '../ComputeScratchSpace/*/'))
             Dirs = glob(ComputeScratchSpace + '/*/')
 
+
             @dask.delayed
             def DoOneDir(DirName):
                 print('Dask for {}'.format(DirName))
                 ProcessAlphaMELTS(DirName=DirName, TargetCompositions=TargetCompositions)
+
+
             Computes = [DoOneDir(Dir) for Dir in Dirs]
             dask.compute(Computes)
 
@@ -56,9 +62,11 @@ if __name__ == "__main__":
 
     if DoPlotting:
         import matplotlib
-        matplotlib.use('Qt5Agg') #,warn=False, force=True)
+
+        matplotlib.use('Qt5Agg')  # ,warn=False, force=True)
         from matplotlib import pyplot as plt
-        print("Switched to:",matplotlib.get_backend())
+
+        print("Switched to:", matplotlib.get_backend())
 
         # Load the inputs, both constant and parameterized
         ConstantInputs = dd.io.load(os.path.join(ComputeScratchSpace, 'ConstantInputs.hdf5'))

@@ -12,11 +12,12 @@ from pathlib import Path
 import deepdish as dd
 import itertools
 import pandas as pd
-from collections import Mapping, Container 
+from collections import Mapping, Container
 from sys import getsizeof
 import h5py
 
-def deep_getsizeof(o, ids): 
+
+def deep_getsizeof(o, ids):
     """Find the memory footprint of a Python object
     This is a recursive function that drills down a Python object graph
     like a dictionary holding nested dictionaries with lists of lists
@@ -48,9 +49,12 @@ def deep_getsizeof(o, ids):
     if isinstance(o, Container):
         return r + sum(d(x, ids) for x in o)
 
-    return r      
+    return r
+
 
 ParameterizedInputs = None
+
+
 def ReadInAllOutputs(ComputeScratchSpace, DataGrid):
     """ Goes through all the completed MELTS calculations and loads in the results to make a
     monster DataGrid.
@@ -63,7 +67,7 @@ def ReadInAllOutputs(ComputeScratchSpace, DataGrid):
 
     # Store the input parameter space for later use.
     global ParameterizedInputs
-    ParameterizedInputs =  h5py.File(os.path.join(ComputeScratchSpace, 'ParameterizedInputs.hdf5'), 'r')
+    ParameterizedInputs = h5py.File(os.path.join(ComputeScratchSpace, 'ParameterizedInputs.hdf5'), 'r')
 
     # Add a column to contain the MELTS calculations.
     DataGrid['MELTS'] = None
@@ -73,9 +77,11 @@ def ReadInAllOutputs(ComputeScratchSpace, DataGrid):
         # MELTSData will be a list of dataframes -- one for each phase that exists in that MELTS computation.
         MELTSData = dict()
         # Read in the phases that exist.
-        for PhaseName  in ['PhaseMassPercents', 'CombinedFitIndex', 'Olivine', 'Clinopyroxene', 'Orthopyroxene', 'Plagioclase', 'Orthoclase', 'Liquid', 'Spinel', 'AlloyLiquid', 'AlloySolid']:
+        for PhaseName in ['PhaseMassPercents', 'CombinedFitIndex', 'Olivine', 'Clinopyroxene', 'Orthopyroxene',
+                          'Plagioclase', 'Orthoclase', 'Liquid', 'Spinel', 'AlloyLiquid', 'AlloySolid']:
             try:
-                DataItem = pd.read_csv(os.path.join(ComputeScratchSpace, DataGrid.iloc[i]['DirName'], 'Output_' + PhaseName + '.csv'))
+                DataItem = pd.read_csv(
+                    os.path.join(ComputeScratchSpace, DataGrid.iloc[i]['DirName'], 'Output_' + PhaseName + '.csv'))
             except FileNotFoundError as e:
                 # File not found just means that phase doesn't exist under these conditions of simulation.
                 continue
@@ -84,6 +90,7 @@ def ReadInAllOutputs(ComputeScratchSpace, DataGrid):
 
     return DataGrid
 
+
 def ExtractIndependentAxis(DataGrid, AxisPath):
     if '/' in AxisPath:
         Axis = ExtractMELTSIndependentAxis(DataGrid, AxisPath)
@@ -91,6 +98,7 @@ def ExtractIndependentAxis(DataGrid, AxisPath):
         global ParameterizedInputs
         Axis = ParameterizedInputs['data'][AxisPath][:]
     return Axis
+
 
 def ExtractMELTSIndependentAxis(DataGrid, AxisPath):
     Path = AxisPath.split('/')
@@ -106,21 +114,26 @@ def ExtractMELTSIndependentAxis(DataGrid, AxisPath):
             if Axis is None:
                 Axis = T
             else:
-                Axis = np.union1d(Axis,T)
+                Axis = np.union1d(Axis, T)
     return Axis
 
+
 def IndexByPath(Prefix, Path):
-    PathStr = ''.join(["['"+s+"']" for s in Path.split("/")])
+    PathStr = ''.join(["['" + s + "']" for s in Path.split("/")])
     return f'{Prefix}{PathStr}'
 
-def Make2DCrossSection(DataGrid, ParameterizedAxisPath, IndependentAxisPath, DependentPath, Plot=True, SavePath=None, Constraints={}):
+
+def Make2DCrossSection(DataGrid, ParameterizedAxisPath, IndependentAxisPath, DependentPath, Plot=True, SavePath=None,
+                       Constraints={}):
     ParameterizedAxis = ExtractIndependentAxis(DataGrid, ParameterizedAxisPath)
     IndependentAxis = ExtractIndependentAxis(DataGrid, IndependentAxisPath)
     if ParameterizedAxis is None:
-        print(f'Make2DCrossSection: cannot find parameterized axis: {ParameterizedAxisPath}. It is likely that you are trying to draw a plot for a phase that didn\'t occur in the output simulations.')
+        print(
+            f'Make2DCrossSection: cannot find parameterized axis: {ParameterizedAxisPath}. It is likely that you are trying to draw a plot for a phase that didn\'t occur in the output simulations.')
         return None, None, None
     if IndependentAxis is None:
-        print(f'Make2DCrossSection: cannot find independent axis: {IndependentAxisPath}.  It is likely that you are trying to draw a plot for a phase that didn\'t occur in the output simulations.')
+        print(
+            f'Make2DCrossSection: cannot find independent axis: {IndependentAxisPath}.  It is likely that you are trying to draw a plot for a phase that didn\'t occur in the output simulations.')
         return None, None, None
     CrossSec = np.zeros((len(ParameterizedAxis), len(IndependentAxis)))
     # We should apply constraints here.  No constraints will be required if there is only one independent variable.
@@ -140,12 +153,14 @@ def Make2DCrossSection(DataGrid, ParameterizedAxisPath, IndependentAxisPath, Dep
         Parameterizedidx = np.where(ParameterizedAxis == Parameterizedval)[0][0]
         IndependentAxisPathParts = IndependentAxisPath.split('/')
         try:
-            Independentvals = np.array(DataGrid.iloc[i][IndependentAxisPathParts[0]][IndependentAxisPathParts[1]][IndependentAxisPathParts[2]])
+            Independentvals = np.array(
+                DataGrid.iloc[i][IndependentAxisPathParts[0]][IndependentAxisPathParts[1]][IndependentAxisPathParts[2]])
         except KeyError as e:
             print(f'{IndependentAxisPathParts} not found.')
         DependentPathParts = DependentPath.split('/')
         try:
-            DependentVals = np.array(DataGrid.iloc[i][DependentPathParts[0]][DependentPathParts[1]][DependentPathParts[2]])
+            DependentVals = np.array(
+                DataGrid.iloc[i][DependentPathParts[0]][DependentPathParts[1]][DependentPathParts[2]])
         except KeyError as e:
             print(f'{DependentPathParts} not found.')
             if 'Independentvals' in locals():
@@ -155,14 +170,14 @@ def Make2DCrossSection(DataGrid, ParameterizedAxisPath, IndependentAxisPath, Dep
                 Independentidx = np.where(IndependentAxis == y)[0][0]
                 CrossSec[Parameterizedidx, Independentidx] = DependentVals[j]
     # If the user wants this plotted then we do that now.
-    if Plot==True:
+    if Plot == True:
         plt.figure()
         # Zeros will mess up the scale of the plot.  We want it to autoscale only on the numbered data.
-        CrossSec[CrossSec==0] = np.NaN
+        CrossSec[CrossSec == 0] = np.NaN
         # Figure out the label names.
-        ParameterizedLabel =  DetermineLabelName(ParameterizedAxisPath)
-        IndependentLabel =  DetermineLabelName(IndependentAxisPath)
-        Title = DependentPath.split('/')[-2] + ' ' + DependentPath.split('/')[-1] 
+        ParameterizedLabel = DetermineLabelName(ParameterizedAxisPath)
+        IndependentLabel = DetermineLabelName(IndependentAxisPath)
+        Title = DependentPath.split('/')[-2] + ' ' + DependentPath.split('/')[-1]
         for c, v in Constraints.items():
             Title += f', {c} = {v}'
         Plot2DCrossSection(CrossSec, IndependentAxis, ParameterizedAxis, IndependentLabel, ParameterizedLabel, Title)
@@ -170,8 +185,10 @@ def Make2DCrossSection(DataGrid, ParameterizedAxisPath, IndependentAxisPath, Dep
             plt.savefig(SavePath)
     return ParameterizedAxis, IndependentAxis, CrossSec
 
+
 def DetermineLabelName(AxisPath):
-    # The label is the last items on the AxisPath.  For example, if the path is MELTS/Olivine/Temperature then the axis will be labeled as temp.
+    # The label is the last items on the AxisPath.  For example, if the path is MELTS/Olivine/Temperature then the
+    # axis will be labeled as temp.
     Label = AxisPath.split('/')[-1]
     # Some labels have prettier versions with LaTeX to make it nice in matplotlib.
     if Label == 'fO2':
@@ -196,6 +213,7 @@ def DetermineLabelName(AxisPath):
         Label = 'CaO (wt.%)'
     return Label
 
+
 def Plot2DCrossSection(CrossSec, XAxis, YAxis, XAxisLabel=None, YAxisLabel=None, Title=None, SavePath=None):
     plt.imshow(CrossSec, origin='lower', extent=[XAxis[0], XAxis[-1], YAxis[0], YAxis[-1]], aspect='auto')
     plt.colorbar()
@@ -206,7 +224,7 @@ def Plot2DCrossSection(CrossSec, XAxis, YAxis, XAxisLabel=None, YAxisLabel=None,
     if SavePath is not None:
         plt.savefig(SavePath)
 
-    
+
 if __name__ == "__main__":
     print('------------------------------ START ------------------------------')
 
@@ -240,12 +258,14 @@ if __name__ == "__main__":
     # fO2Axis = ExtractIndependentAxis(DataGrid, 'fO2')
 
     # fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/Olivine/Temperature', 'MELTS/Olivine/FitIndex')
-    fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/Orthopyroxene/Temperature', 'MELTS/Orthopyroxene/FitIndex')
+    fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/Orthopyroxene/Temperature',
+                                                     'MELTS/Orthopyroxene/FitIndex')
     # fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/Liquid/Temperature', 'MELTS/Liquid/FitIndex')
     # fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/CombinedFitIndex/Temperature', 'MELTS/CombinedFitIndex/FitIndex')
-    CrossSec[CrossSec==0] = np.NaN
+    CrossSec[CrossSec == 0] = np.NaN
 
-    plt.imshow(np.fliplr(CrossSec), origin='lower', extent=[TempAxis[0], TempAxis[-1], fO2Axis[0], fO2Axis[-1]], aspect='auto')
+    plt.imshow(np.fliplr(CrossSec), origin='lower', extent=[TempAxis[0], TempAxis[-1], fO2Axis[0], fO2Axis[-1]],
+               aspect='auto')
     plt.colorbar()
     plt.xlabel('Temperature $^{\circ}$C')
     plt.gca().invert_xaxis()
@@ -254,4 +274,3 @@ if __name__ == "__main__":
     plt.show()
 
     print('------------------------------ DONE ------------------------------')
-
