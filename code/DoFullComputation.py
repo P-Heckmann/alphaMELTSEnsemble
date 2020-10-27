@@ -14,7 +14,10 @@ install()
 if __name__ == "__main__":
     print('------------------------------ START ------------------------------')
 
-    # NOTA BENE!  There is no longer a need to edit the file.  All the input parameters and editable portions have been moved to SimulationParameters.py.  The user should edit the file SimulationParameters.py.  It has the input composition as well as desired output plots, etc.
+    # NOTA BENE!  There is no longer a need to edit the file.  All the input parameters and editable portions have been
+    # moved to SimulationParameters.py.  The user should edit the file SimulationParameters.py.  It has the input
+    # composition as well as desired output plots, etc.
+
     from SimulationParameters import *
 
     print('------------------------------ MELTS SIMULATIONS --------------------------')

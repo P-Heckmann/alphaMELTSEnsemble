@@ -56,7 +56,8 @@ def GenerateMELTSEnsemble(  alphaMELTSLocation, ComputeScratchSpace,
     # Now Compute a directory name for each calculation and add that to the dataframe.
     ParameterGrid['DirName'] = ConstantInputs['Title']
     for i in range(ParameterGrid.shape[0]):
-        ParameterGrid.at[i,'DirName'] = ParameterGrid.iloc[i]['DirName'] + CreateNameOfCalculation(ParameterGrid.iloc[i])
+        ParameterGrid.at[i,'DirName'] = ParameterGrid.iloc[i]['DirName'] + \
+                                        CreateNameOfCalculation(ParameterGrid.iloc[i])
 
     # Report to the user how beefy this calculation will be.
     print(f'Total number of alphaMELTS calculations will be: {ParameterGrid.shape[0]}')
@@ -99,7 +100,8 @@ def GenerateMELTSEnsemble(  alphaMELTSLocation, ComputeScratchSpace,
 
         # Add this computation to the RunAll file.
         RunAll += 'cd "' + ComputeDir + '" && "'
-        RunAll += os.path.join(alphaMELTSLocation, 'run_alphamelts.command') + '" -f alphamelts_settings.txt -b mybatch\n'
+        RunAll += os.path.join(alphaMELTSLocation, 'run_alphamelts.command') + \
+                  '" -f alphamelts_settings.txt -b mybatch\n'
 
     # Store the parameterized space to disk so we can reassemble the ensemble later.
     dd.io.save(os.path.join(ComputeScratchSpace, 'ConstantInputs.hdf5'), ConstantInputs)
@@ -132,7 +134,8 @@ if __name__ == "__main__":
     ConstantInputs = dict()
     ConstantInputs['Title'] = 'VaryfO2'
     ConstantInputs['Buffer'] = 'IW'
-    # Set the temperature.  Because this is a single value, there will only be an initial temperature entry made in the inputs melt file.
+    # Set the temperature.  Because this is a single value, there will only be an initial temperature entry made
+    # in the inputs melt file.
     ConstantInputs['T'] = 1500 # Temperature
     ConstantInputs['P'] = 1 # Bar
     # And so for all the elements.

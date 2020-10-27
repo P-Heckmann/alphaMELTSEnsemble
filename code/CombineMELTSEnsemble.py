@@ -129,11 +129,15 @@ def Make2DCrossSection(DataGrid, ParameterizedAxisPath, IndependentAxisPath, Dep
     IndependentAxis = ExtractIndependentAxis(DataGrid, IndependentAxisPath)
     if ParameterizedAxis is None:
         print(
-            f'Make2DCrossSection: cannot find parameterized axis: {ParameterizedAxisPath}. It is likely that you are trying to draw a plot for a phase that didn\'t occur in the output simulations.')
+            f'Make2DCrossSection: cannot find parameterized axis: {ParameterizedAxisPath}. '
+            f'It is likely that you are trying to draw a plot for a phase that didn\'t occur '
+            f'in the output simulations.')
         return None, None, None
     if IndependentAxis is None:
         print(
-            f'Make2DCrossSection: cannot find independent axis: {IndependentAxisPath}.  It is likely that you are trying to draw a plot for a phase that didn\'t occur in the output simulations.')
+            f'Make2DCrossSection: cannot find independent axis: {IndependentAxisPath}.  '
+            f'It is likely that you are trying to draw a plot for a phase that didn\'t occur in '
+            f'the output simulations.')
         return None, None, None
     CrossSec = np.zeros((len(ParameterizedAxis), len(IndependentAxis)))
     # We should apply constraints here.  No constraints will be required if there is only one independent variable.
@@ -257,11 +261,14 @@ if __name__ == "__main__":
     # TempAxis = ExtractIndependentAxis(DataGrid, 'MELTS/Olivine/Temperature')
     # fO2Axis = ExtractIndependentAxis(DataGrid, 'fO2')
 
-    # fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/Olivine/Temperature', 'MELTS/Olivine/FitIndex')
+    # fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/Olivine/Temperature',
+    # 'MELTS/Olivine/FitIndex')
     fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/Orthopyroxene/Temperature',
                                                      'MELTS/Orthopyroxene/FitIndex')
-    # fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/Liquid/Temperature', 'MELTS/Liquid/FitIndex')
-    # fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/CombinedFitIndex/Temperature', 'MELTS/CombinedFitIndex/FitIndex')
+    # fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/Liquid/Temperature',
+    # 'MELTS/Liquid/FitIndex')
+    # fO2Axis, TempAxis, CrossSec = Make2DCrossSection(DataGrid, 'fO2', 'MELTS/CombinedFitIndex/Temperature',
+    # 'MELTS/CombinedFitIndex/FitIndex')
     CrossSec[CrossSec == 0] = np.NaN
 
     plt.imshow(np.fliplr(CrossSec), origin='lower', extent=[TempAxis[0], TempAxis[-1], fO2Axis[0], fO2Axis[-1]],
