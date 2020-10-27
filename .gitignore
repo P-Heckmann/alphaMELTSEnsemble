@@ -16,3 +16,4 @@ __pycache__
 
 # Ingore pycharm stuff
 .idea/*
+venv
